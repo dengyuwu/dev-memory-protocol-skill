@@ -20,7 +20,7 @@
 把这个仓库链接发给 AI，然后使用下面这句话：
 
 ```text
-从这个 GitHub 仓库为当前项目安装 dev-memory-protocol，兼容 Codex 和 Claude Code，只追加规则不覆盖现有 AGENTS.md/CLAUDE.md，初始化 .ai 记忆层并启用开发记忆工作流：<repo-url>
+帮我从这个仓库安装 dev-memory-protocol：https://github.com/dengyuwu/dev-memory-protocol-skill
 ```
 
 安装入口：
