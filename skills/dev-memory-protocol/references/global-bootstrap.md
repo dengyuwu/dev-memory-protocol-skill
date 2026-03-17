@@ -21,6 +21,20 @@ Run:
 node "<skill-path>/scripts/install-global.mjs"
 ```
 
+## Enable And Initialize Current Project
+
+If you want one immediate follow-up step after skill installation, run:
+
+```bash
+node "<skill-path>/scripts/post-install.mjs" --project .
+```
+
+This will:
+
+- enable the managed global bootstrap block
+- initialize `.ai/` for the current directory if it already looks like a project root
+- let you use the scripts immediately without waiting for Codex to reload the installed skill registry
+
 ## Disable
 
 Run:

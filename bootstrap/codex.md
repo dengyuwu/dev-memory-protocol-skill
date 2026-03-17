@@ -11,5 +11,8 @@ Expected execution:
 Optional global bootstrap:
 - If the user wants future Codex project conversations to auto-check and auto-initialize `.ai`, run `node ./skills/dev-memory-protocol/scripts/install-global.mjs`.
 
+One-step enable flow:
+- If the user wants to enable global bootstrap and initialize the current project immediately after installation, run `node ./skills/dev-memory-protocol/scripts/post-install.mjs --project .`.
+
 Removal guide:
 - Read `bootstrap/remove-codex.md` or `bootstrap/uninstall.md`.

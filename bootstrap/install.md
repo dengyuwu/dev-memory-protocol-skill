@@ -13,6 +13,7 @@ Installation contract:
 6. Prefer wiring hooks so memory read, recall, candidate capture, and indexing run automatically after installation.
 7. Report which files were created or updated.
 8. If the user wants auto-bootstrap across future Codex project conversations, tell them to enable the skill-managed global bootstrap with `install-global.mjs`.
+9. If the user wants one immediate follow-up step that enables global bootstrap and initializes the current project when possible, tell them to run `post-install.mjs`.
 
 Supported environment:
 - Windows and macOS

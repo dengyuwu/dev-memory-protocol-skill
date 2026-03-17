@@ -22,6 +22,15 @@ Use this skill to install or operate a project-local memory layer for software d
 3. Let the skill append its managed global bootstrap block to `~/.codex/AGENTS.md`.
 4. Use `uninstall-global.mjs` to remove only that managed global block later.
 
+## Install And Enable
+
+1. Use this when the user wants a single follow-up step after skill installation.
+2. Run `node "<path-to-this-skill>/scripts/post-install.mjs" --project <target-project>`.
+3. This will:
+   - enable the managed global bootstrap block in `~/.codex/AGENTS.md`
+   - initialize the current project if it looks like a project root and `.ai` is not present yet
+4. This does not require waiting for Codex to reload the skill registry before using the scripts directly.
+
 ## Uninstall
 
 1. Read `references/uninstalling.md`.

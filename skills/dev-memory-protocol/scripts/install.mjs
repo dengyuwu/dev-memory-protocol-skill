@@ -51,13 +51,17 @@ async function detectTool(projectRoot) {
   return "both";
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const projectRoot = resolveProjectPath(args.project || ".");
+export async function runInstall(options = {}) {
+  const {
+    project = ".",
+    tool: explicitTool
+  } = options;
+
+  const projectRoot = resolveProjectPath(project);
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
   const templateRoot = path.resolve(scriptDir, "../assets/templates");
   const aiRoot = path.join(projectRoot, ".ai");
-  const tool = args.tool || (await detectTool(projectRoot));
+  const tool = explicitTool || (await detectTool(projectRoot));
 
   if (!["codex", "claude", "both"].includes(tool)) {
     throw new Error(`Invalid --tool value: ${tool}`);
@@ -97,7 +101,19 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  await runInstall({
+    project: args.project || ".",
+    tool: args.tool
+  });
+}
+
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}

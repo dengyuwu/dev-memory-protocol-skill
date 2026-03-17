@@ -12,6 +12,7 @@
     "install:codex": "node ./skills/dev-memory-protocol/scripts/install.mjs --tool codex --project .",
     "install:claude": "node ./skills/dev-memory-protocol/scripts/install.mjs --tool claude --project .",
     "install:both": "node ./skills/dev-memory-protocol/scripts/install.mjs --tool both --project .",
+    "install:enable": "node ./skills/dev-memory-protocol/scripts/post-install.mjs --project .",
     "install:global": "node ./skills/dev-memory-protocol/scripts/install-global.mjs",
     "uninstall:auto": "node ./skills/dev-memory-protocol/scripts/uninstall.mjs --project .",
     "uninstall:codex": "node ./skills/dev-memory-protocol/scripts/uninstall.mjs --tool codex --project .",

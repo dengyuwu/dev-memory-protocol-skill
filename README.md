@@ -23,6 +23,12 @@
 帮我从这个仓库安装 dev-memory-protocol：https://github.com/dengyuwu/dev-memory-protocol-skill
 ```
 
+如果你希望安装后立刻启用全局自动引导，并在当前目录是项目时顺手初始化 `.ai`，推荐紧接着执行：
+
+```bash
+node "<installed-skill-path>/scripts/post-install.mjs" --project .
+```
+
 安装入口：
 
 - 通用引导：[bootstrap/install.md](./bootstrap/install.md)
@@ -59,6 +65,8 @@ node "<installed-skill-path>/scripts/install-global.mjs"
 ```
 
 这个全局 bootstrap 也是由 skill 自己追加受控区块到 `~/.codex/AGENTS.md`，不是手工硬改。
+
+如果你想一步完成“启用全局 bootstrap + 初始化当前项目”，用 `post-install.mjs` 就行，不必分开执行两条命令。
 
 ## 一句话移除
 
@@ -123,6 +131,7 @@ README.md
 ## 核心脚本
 
 - `install.mjs`：安装协议，追加规则并初始化 `.ai/`
+- `post-install.mjs`：启用全局 bootstrap，并在当前目录是项目时立即初始化 `.ai/`
 - `install-global.mjs`：由 skill 为 Codex 安装全局自动引导区块
 - `uninstall.mjs`：移除协议，只删除受控规则块
 - `uninstall-global.mjs`：移除 skill 追加的全局自动引导区块
@@ -166,6 +175,7 @@ README.md
 
 ```bash
 npm run install:auto
+npm run install:enable
 npm run install:global
 npm run uninstall:auto
 npm run uninstall:global
