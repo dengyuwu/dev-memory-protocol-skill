@@ -50,6 +50,40 @@ node "<已安装的-skill-路径>/scripts/setup.mjs" --project .
 - 把 skill 管理的全局引导区块追加到 `~/.codex/AGENTS.md`
 - 为 Claude Code 写入项目级 hooks，默认写到 `.claude/settings.json`
 
+## 安装成功回执模板
+
+如果你让 AI 执行一句话安装，推荐它在结束后按下面这种格式回报，而不是输出模糊或不准确的总结：
+
+```text
+已根据仓库中的 bootstrap/manifest.json 与推荐安装入口完成 vbm 安装，并已执行 manifest 指定的 install_script。
+
+本次已完成：
+- 当前项目 .ai 初始化
+- 项目规则追加
+- Codex 全局引导写入（如当前工具链包含 Codex）
+- Claude Code 默认 hooks 配置（如当前工具链包含 Claude Code）
+
+本地核验结果：
+- .ai/project 已存在
+- .ai/memory 已存在
+- .ai/index 已存在
+- Claude 的 SessionStart / SessionEnd hooks 已写入（如适用）
+
+说明：
+- 当前项目已经可以直接开始使用，不必把“重启 Codex”当成初始化成功的前置条件
+- 只有当你希望 Codex 在后续新会话中重新发现新安装的 skill 列表时，才需要重启 Codex
+```
+
+不推荐类似下面这种说法：
+
+- “仓库里没有 manifest.json，所以本次是按推荐命令猜测执行的”
+- “现在只差重启 Codex，否则当前项目还不能使用”
+
+因为这两句都不准确：
+
+- 本仓库明确包含 `bootstrap/manifest.json`
+- 只要 `setup.mjs` 已执行成功，当前项目的 `.ai`、规则和 hooks 就已经生效
+
 ## 一句话移除
 
 把这个仓库链接发给 AI，直接说：

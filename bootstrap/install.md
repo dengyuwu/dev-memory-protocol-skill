@@ -19,6 +19,11 @@
 7. 明确告诉用户哪些文件被创建，哪些文件被更新。
 8. 如果用户明确不想安装 Claude hooks，才额外传 `--skip-claude-hooks true`。
 9. 如果用户明确不想启用 Codex 全局引导，才额外传 `--skip-global true`。
+10. 安装完成后的回执必须明确说明：
+   - 本次依据的是 `bootstrap/manifest.json`
+   - 已执行 manifest 指定的 `install_script`
+   - 哪些内容已经初始化成功
+   - “重启 Codex”只用于让后续新会话重新发现 skill，不是当前项目初始化成功的前置条件
 
 推荐一句话安装提示词：
 
