@@ -1,12 +1,8 @@
-Use this repository to remove development memory workflow from Codex projects.
+把这个仓库用于 Codex 项目的开发记忆协议移除。
 
-Suggested one-line prompt:
-`Remove dev-memory-protocol from this repository for the current project, delete only its managed rules from AGENTS.md, keep .ai memory files, and leave all other project rules intact.`
+执行方式：
 
-Expected execution:
-1. Read `bootstrap/uninstall.md`.
-2. Run `node ./skills/dev-memory-protocol/scripts/uninstall.mjs --tool codex --project <target-project>`.
-3. Report the files updated and the memory files retained.
-
-Optional global bootstrap removal:
-- If the user previously enabled Codex-wide auto-bootstrap, run `node ./skills/dev-memory-protocol/scripts/uninstall-global.mjs`.
+1. 先读取 `bootstrap/uninstall.md`。
+2. 执行 `node ./skills/vbm/scripts/remove.mjs --tool codex --project <目标项目>`。
+3. 删除 `AGENTS.md` 中的受控区块，并对称移除 Codex 全局引导。
+4. 保留 `.ai/` 目录和记忆文件。

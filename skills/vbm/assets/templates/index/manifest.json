@@ -1,0 +1,12 @@
+{
+  "管理器": "vbm",
+  "版本": "0.1.0",
+  "安装时间": "",
+  "工具": "",
+  "基础记忆文件": [
+    ".ai/project/overview.md",
+    ".ai/project/config-map.md",
+    ".ai/memory/handoff.md",
+    ".ai/memory/known-risks.md"
+  ]
+}

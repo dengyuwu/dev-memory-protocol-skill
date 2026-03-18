@@ -1,22 +1,16 @@
-Use this repository as a one-sentence uninstall target for development memory workflow.
+把这个仓库当作“开发记忆协议”的一句话移除目标来使用。
 
-Uninstall contract:
-1. Read `bootstrap/manifest.json`.
-2. Detect the active tool:
-   - Prefer `--tool codex` when the user explicitly asks to remove Codex rules only.
-   - Prefer `--tool claude` when the user explicitly asks to remove Claude Code rules only.
-   - Prefer `--tool both` when the user explicitly asks to remove both.
-   - Otherwise let the uninstaller auto-detect by omitting `--tool`.
-3. Run `node ./skills/dev-memory-protocol/scripts/uninstall.mjs --project <target-project>`.
-4. Remove only the managed rule block. Never modify user-authored rules outside the managed block.
-5. Keep `.ai/` project memory files by default so the user does not lose project knowledge.
-6. Report which files were updated and which memory files were retained.
-7. If the user also enabled the skill-managed global bootstrap earlier, tell them to remove it with `uninstall-global.mjs`.
+移除约定：
 
-Supported environment:
-- Windows and macOS
-- Node.js 18 or newer
-- Codex and Claude Code
+1. 先读取 `bootstrap/manifest.json`。
+2. 执行 `node ./skills/vbm/scripts/remove.mjs --project <目标项目>`。
+3. 默认移除 `AGENTS.md`、`CLAUDE.md` 中由这个 skill 追加的受控区块。
+4. 如果当前安装流程启用了 Codex 全局引导和 Claude hooks，也一并对称移除。
+5. 不得修改区块外的用户规则。
+6. 默认保留 `.ai/` 里的项目记忆文件。
+7. 移除后重新生成 `.ai/index/manifest.json`，让保留的记忆仍可检索。
+8. 明确告诉用户哪些规则文件被修改，以及哪些 `.ai` 文件被保留。
 
-User-facing one-line prompt:
-`Remove dev-memory-protocol from this repository for the current project, delete only its managed rules from AGENTS.md/CLAUDE.md, keep existing project memory files in .ai, and keep all other project rules intact.`
+一句话移除提示词：
+
+`帮我移除 vbm（Vibe Memory）为当前项目追加的记忆规则：https://github.com/dengyuwu/vibe-memory.git`

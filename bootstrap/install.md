@@ -1,30 +1,25 @@
-Use this repository as a one-sentence install target for development memory workflow.
+把这个仓库当作“开发记忆协议”的一句话安装目标来使用。
 
-Installation contract:
-1. Read `bootstrap/manifest.json`.
-2. Detect the active tool:
-   - Prefer `--tool codex` when the user explicitly asks for Codex only.
-   - Prefer `--tool claude` when the user explicitly asks for Claude Code only.
-   - Prefer `--tool both` when the user explicitly asks for both.
-   - Otherwise let the installer auto-detect by omitting `--tool`.
-3. Run `node ./skills/dev-memory-protocol/scripts/install.mjs --project <target-project>`.
-4. Append the managed rule block only. Never overwrite existing rules outside the managed block.
-5. Initialize `.ai/` files if missing. Do not delete user-authored memory files.
-6. Prefer wiring hooks so memory read, recall, candidate capture, and indexing run automatically after installation.
-7. Report which files were created or updated.
-8. If the user wants auto-bootstrap across future Codex project conversations, tell them to enable the skill-managed global bootstrap with `install-global.mjs`.
-9. If the user wants one immediate follow-up step that enables global bootstrap and initializes the current project when possible, tell them to run `post-install.mjs`.
+安装约定：
 
-Supported environment:
-- Windows and macOS
-- Node.js 18 or newer
-- Codex and Claude Code
+1. 先读取 `bootstrap/manifest.json`。
+2. 识别用户当前要给哪个工具接入：
+   - 用户明确说只给 Codex 用，才传 `--tool codex`
+   - 用户明确说只给 Claude Code 用，才传 `--tool claude`
+   - 用户明确说两个都要，才传 `--tool both`
+   - 其他情况让安装脚本自动检测，不主动传 `--tool`
+3. 执行 `node ./skills/vbm/scripts/setup.mjs --project <目标项目>`。
+4. 默认推荐安装流程应一次完成：
+   - 项目规则追加
+   - `.ai/` 初始化
+   - Codex 全局引导
+   - Claude Code hooks 配置
+5. 只追加受控规则区块，不能覆盖用户原有规则。
+6. 如果 `.ai/` 已存在，就保留已有内容。
+7. 明确告诉用户哪些文件被创建，哪些文件被更新。
+8. 如果用户明确不想安装 Claude hooks，才额外传 `--skip-claude-hooks true`。
+9. 如果用户明确不想启用 Codex 全局引导，才额外传 `--skip-global true`。
 
-User-facing one-line prompt:
-`帮我从这个仓库安装 dev-memory-protocol：https://github.com/dengyuwu/dev-memory-protocol-skill`
+推荐一句话安装提示词：
 
-Auto-detect behavior:
-- If only `AGENTS.md` exists, install for Codex.
-- If only `CLAUDE.md` exists, install for Claude Code.
-- If both exist, install for both.
-- If neither exists, install for both so future sessions on either tool can use the protocol.
+`帮我从这个仓库安装 vbm（Vibe Memory）skill，并在安装后立即执行仓库 manifest 指定的 install_script，为当前项目完成 .ai 初始化、规则追加和默认 hook 配置：https://github.com/dengyuwu/vibe-memory.git`

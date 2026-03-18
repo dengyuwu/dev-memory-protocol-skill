@@ -1,0 +1,6 @@
+interface:
+  display_name: "Vibe Memory (vbm)"
+  short_description: "用 vbm 为项目安装、读取和沉淀开发记忆"
+  default_prompt: "使用 $vbm 为当前项目安装 Vibe Memory，初始化 .ai 记忆层，并帮助自动读取、整理、沉淀已验证的开发记忆。"
+policy:
+  allow_implicit_invocation: true

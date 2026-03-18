@@ -1,12 +1,12 @@
 {
-  "name": "dev-memory-protocol",
+  "name": "vbm",
   "version": "0.1.0",
   "repository_layout": {
-    "skill_path": "skills/dev-memory-protocol",
+    "skill_path": "skills/vbm",
     "install_doc": "bootstrap/install.md",
-    "install_script": "skills/dev-memory-protocol/scripts/install.mjs",
+    "install_script": "skills/vbm/scripts/setup.mjs",
     "uninstall_doc": "bootstrap/uninstall.md",
-    "uninstall_script": "skills/dev-memory-protocol/scripts/uninstall.mjs"
+    "uninstall_script": "skills/vbm/scripts/remove.mjs"
   },
   "default_install_mode": "auto",
   "supported_tools": [
@@ -17,7 +17,7 @@
     "win32",
     "darwin"
   ],
-  "managed_block_id": "dev-memory-protocol",
+  "managed_block_id": "vbm",
   "memory_root": ".ai",
   "rule_targets": {
     "codex": [

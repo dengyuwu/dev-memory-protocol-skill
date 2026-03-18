@@ -1,6 +1,0 @@
-interface:
-  display_name: "Development Memory Protocol"
-  short_description: "Install and operate append-only project memory for development"
-  default_prompt: "Use $dev-memory-protocol to install append-only development memory for this project and initialize the .ai knowledge files."
-policy:
-  allow_implicit_invocation: true
