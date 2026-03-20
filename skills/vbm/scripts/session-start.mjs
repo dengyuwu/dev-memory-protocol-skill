@@ -2,23 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { runInstall } from "./install.mjs";
 import { 基础记忆文件, 记忆路径 } from "./lib/memory-paths.mjs";
-import { fileExists, resolveProjectPath, toPosixPath } from "./lib/path-utils.mjs";
-
-const PROJECT_MARKERS = [
-  ".git",
-  "package.json",
-  "pnpm-workspace.yaml",
-  "pom.xml",
-  "build.gradle",
-  "settings.gradle",
-  "pyproject.toml",
-  "requirements.txt",
-  "Cargo.toml",
-  "go.mod",
-  "composer.json",
-  "Gemfile",
-  "Makefile"
-];
+import { fileExists, isProjectDirectory, resolveProjectPath, toPosixPath } from "./lib/path-utils.mjs";
 
 function parseArgs(argv) {
   const args = {};
@@ -35,16 +19,6 @@ function parseArgs(argv) {
     }
   }
   return args;
-}
-
-async function isProjectDirectory(projectRoot) {
-  for (const marker of PROJECT_MARKERS) {
-    if (await fileExists(path.join(projectRoot, marker))) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 async function main() {

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { buildFrontmatter, rebuildIndexes } from "./lib/memory-store.mjs";
 import { 获取记录目录 } from "./lib/memory-paths.mjs";
-import { resolveProjectPath, slugify, toPosixPath, writeText } from "./lib/path-utils.mjs";
+import { ensureUniquePath, resolveProjectPath, slugify, toPosixPath, writeText } from "./lib/path-utils.mjs";
 
 function parseArgs(argv) {
   const args = {};
@@ -86,7 +86,9 @@ async function main() {
 
   const recordDate = new Date().toISOString().slice(0, 10);
   const fileName = `${recordDate}-${slugify(title)}.md`;
-  const targetPath = path.join(projectRoot, ...获取记录目录(type).split("/"), fileName);
+  const targetPath = await ensureUniquePath(
+    path.join(projectRoot, ...获取记录目录(type).split("/"), fileName)
+  );
 
   const frontmatter = buildFrontmatter({
     type,

@@ -5,15 +5,43 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-function normalizeGitError(error) {
+export class GitCommandError extends Error {
+  constructor(message, reason = "unknown") {
+    super(message);
+    this.name = "GitCommandError";
+    this.reason = reason;
+  }
+}
+
+function normalizeGitError(error, projectRoot) {
   const stderr = error.stderr?.toString().trim();
   const message = stderr || error.message || "git command failed";
 
-  if (/spawn\s+EPERM/i.test(message) || /operation not permitted/i.test(message)) {
-    return "当前环境禁止脚本直接调用 git 命令。";
+  if (/dubious ownership/i.test(message)) {
+    const safeDirectory = projectRoot.replace(/\\/g, "/");
+    return new GitCommandError(
+      `git 拒绝访问当前仓库，原因是 dubious ownership。请先执行 git config --global --add safe.directory "${safeDirectory}"，再重试。`,
+      "dubious-ownership"
+    );
   }
 
-  return message;
+  if (/spawn\s+EPERM/i.test(message) || /operation not permitted/i.test(message)) {
+    return new GitCommandError("当前环境禁止脚本直接调用 git 命令。", "command-blocked");
+  }
+
+  if (
+    /enoent/i.test(message) ||
+    /not recognized as an internal or external command/i.test(message) ||
+    /command not found/i.test(message)
+  ) {
+    return new GitCommandError("当前环境未安装 git，或 git 不在 PATH 中。", "git-not-installed");
+  }
+
+  if (/not a git repository/i.test(message)) {
+    return new GitCommandError("当前目录不是 git 仓库。", "not-a-repository");
+  }
+
+  return new GitCommandError(message, "unknown");
 }
 
 export async function runGit(projectRoot, args) {
@@ -25,7 +53,7 @@ export async function runGit(projectRoot, args) {
     });
     return result.stdout.trim();
   } catch (error) {
-    throw new Error(normalizeGitError(error));
+    throw normalizeGitError(error, projectRoot);
   }
 }
 

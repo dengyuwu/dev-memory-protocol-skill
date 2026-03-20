@@ -2,7 +2,7 @@ import path from "node:path";
 import { buildFrontmatter, rebuildIndexes } from "./memory-store.mjs";
 import { isGitRepository, listChangedFiles, readDiff } from "./git-utils.mjs";
 import { 获取记录目录 } from "./memory-paths.mjs";
-import { slugify, toPosixPath, writeText } from "./path-utils.mjs";
+import { ensureUniquePath, slugify, toPosixPath, writeText } from "./path-utils.mjs";
 
 function unique(values) {
   return Array.from(new Set(values.filter(Boolean)));
@@ -103,7 +103,8 @@ export function inferTitle(type, titleArg, query, changedPaths) {
 }
 
 export function summarizeDiff(diffText) {
-  const lines = String(diffText || "").split(/\r?\n/);
+  const normalized = String(diffText || "");
+  const lines = normalized.split(/\r?\n/);
   let additions = 0;
   let deletions = 0;
   const files = new Set();
@@ -141,7 +142,8 @@ export function summarizeDiff(diffText) {
     changedFiles: Array.from(files),
     additions,
     deletions,
-    hunkHeaders: unique(hunks).slice(0, 6)
+    hunkHeaders: unique(hunks).slice(0, 6),
+    hasDiffDetails: normalized.trim().length > 0
   };
 }
 
@@ -153,7 +155,10 @@ export function buildBody(type, query, changedPaths, diffSummary) {
   const hunkList =
     diffSummary.hunkHeaders.length > 0
       ? diffSummary.hunkHeaders.map((item) => `- \`${item}\``).join("\n")
-      : "- 在最终落盘前，请先人工复核 diff 细节。";
+      : "- 当前没有读取到 diff hunk，请在最终落盘前人工补齐关键改动。";
+  const diffSummaryText = diffSummary.hasDiffDetails
+    ? `本次 diff 当前新增 ${diffSummary.additions} 行，删除 ${diffSummary.deletions} 行。`
+    : "当前没有读取到 git diff 细节，以下候选基于变更路径生成，请在复核后补齐真实改动。";
 
   if (type === "bug") {
     return `## 现象
@@ -169,7 +174,7 @@ ${fileList}
 
 ## 修复
 
-本次 diff 当前新增 ${diffSummary.additions} 行，删除 ${diffSummary.deletions} 行。
+${diffSummaryText}
 
 关键片段：
 ${hunkList}
@@ -191,7 +196,7 @@ ${fileList}
 
 ## 决策
 
-本次 diff 当前新增 ${diffSummary.additions} 行，删除 ${diffSummary.deletions} 行。请在复核后写下这次真实生效的决策。
+${diffSummaryText} 请在复核后写下这次真实生效的决策。
 
 关键片段：
 ${hunkList}
@@ -201,6 +206,58 @@ ${hunkList}
 - 复核受影响的下游模块、接口或脚本。
 - 把候选文本替换成最终结论、权衡取舍和后续约束。
 `;
+}
+
+async function collectDiffContext(projectRoot, scope, providedPaths) {
+  const manualPaths = unique(providedPaths);
+  const hasGitRepo = await isGitRepository(projectRoot);
+  let gitPaths = [];
+  let diffText = "";
+  let source = "git-diff";
+  let sourceNote = "";
+
+  if (hasGitRepo) {
+    try {
+      gitPaths = await listChangedFiles(projectRoot, scope);
+    } catch (error) {
+      if (manualPaths.length === 0) {
+        throw new Error(`无法读取 git 变更文件：${error.message}`);
+      }
+      source = "paths-only";
+      sourceNote = `git 变更读取失败，已回退到 --paths：${error.message}`;
+    }
+  } else if (manualPaths.length === 0) {
+    throw new Error("目标目录不是 git 仓库，也没有通过 --paths 提供变更文件。");
+  }
+
+  const changedPaths = unique([...gitPaths, ...manualPaths]).filter((item) => !isManagedPath(item));
+  if (changedPaths.length === 0) {
+    throw new Error("在当前 diff 范围内没有检测到可用于记忆生成的业务变更文件。");
+  }
+
+  if (source === "git-diff") {
+    try {
+      diffText = await readDiff(projectRoot, scope, changedPaths);
+    } catch (error) {
+      if (manualPaths.length === 0) {
+        throw new Error(`无法读取 git diff：${error.message}`);
+      }
+      source = "paths-only";
+      sourceNote = `git diff 读取失败，已回退到 --paths：${error.message}`;
+    }
+  }
+
+  if (!diffText.trim() && manualPaths.length > 0 && gitPaths.length === 0) {
+    source = "paths-only";
+    sourceNote = sourceNote || "当前没有检测到 git diff，已按 --paths 提供的文件生成候选。";
+  }
+
+  return {
+    changedPaths,
+    diffText,
+    source,
+    sourceNote
+  };
 }
 
 export async function createDiffCandidate(projectRoot, options = {}) {
@@ -217,20 +274,7 @@ export async function createDiffCandidate(projectRoot, options = {}) {
     throw new Error("只支持 --scope staged、--scope unstaged 或 --scope all。");
   }
 
-  if (!(await isGitRepository(projectRoot))) {
-    throw new Error("目标目录不是 git 仓库。");
-  }
-
-  const changedPaths = unique([
-    ...(await listChangedFiles(projectRoot, scope)),
-    ...paths
-  ]).filter((item) => !isManagedPath(item));
-
-  if (changedPaths.length === 0) {
-    throw new Error("在当前 diff 范围内没有检测到可用于记忆生成的业务变更文件。");
-  }
-
-  const diffText = await readDiff(projectRoot, scope, changedPaths);
+  const { changedPaths, diffText, source, sourceNote } = await collectDiffContext(projectRoot, scope, paths);
   const diffSummary = summarizeDiff(diffText);
   const type = inferType(requestedType, `${query} ${requestedTitle}`);
   const title = inferTitle(type, requestedTitle, query, changedPaths);
@@ -238,7 +282,8 @@ export async function createDiffCandidate(projectRoot, options = {}) {
   const body = buildBody(type, query, changedPaths, diffSummary);
 
   return {
-    source: "git-diff",
+    source,
+    sourceNote,
     scope,
     type,
     title,
@@ -251,7 +296,7 @@ export async function createDiffCandidate(projectRoot, options = {}) {
 }
 
 export function toDisplayCandidate(candidate) {
-  return {
+  const result = {
     来源: candidate.source,
     范围: candidate.scope,
     类型: candidate.type,
@@ -262,6 +307,12 @@ export function toDisplayCandidate(candidate) {
     删除行数: candidate.deletions,
     正文: candidate.body
   };
+
+  if (candidate.sourceNote) {
+    result.说明 = candidate.sourceNote;
+  }
+
+  return result;
 }
 
 export async function writeDiffCandidate(projectRoot, candidate, options = {}) {
@@ -272,7 +323,9 @@ export async function writeDiffCandidate(projectRoot, candidate, options = {}) {
 
   const recordDate = new Date().toISOString().slice(0, 10);
   const fileName = `${recordDate}-${slugify(candidate.title)}.md`;
-  const targetPath = path.join(projectRoot, ...获取记录目录(candidate.type).split("/"), fileName);
+  const targetPath = await ensureUniquePath(
+    path.join(projectRoot, ...获取记录目录(candidate.type).split("/"), fileName)
+  );
 
   const frontmatter = buildFrontmatter({
     type: candidate.type,

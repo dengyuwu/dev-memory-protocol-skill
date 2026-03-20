@@ -1,26 +1,9 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildGlobalBootstrapBlock, upsertGlobalBootstrapBlock } from "./lib/global-bootstrap.mjs";
 import { runInstall } from "./install.mjs";
 import { 记忆路径 } from "./lib/memory-paths.mjs";
-import { fileExists, readTextMaybe, resolveProjectPath, toPosixPath, writeText } from "./lib/path-utils.mjs";
-
-const PROJECT_MARKERS = [
-  ".git",
-  "package.json",
-  "pnpm-workspace.yaml",
-  "pom.xml",
-  "build.gradle",
-  "settings.gradle",
-  "pyproject.toml",
-  "requirements.txt",
-  "Cargo.toml",
-  "go.mod",
-  "composer.json",
-  "Gemfile",
-  "Makefile"
-];
+import { fileExists, isProjectDirectory, readTextMaybe, resolveProjectPath, toPosixPath, writeText } from "./lib/path-utils.mjs";
 
 function parseArgs(argv) {
   const args = {};
@@ -46,15 +29,6 @@ async function ensureGlobalBootstrap(skillRoot) {
   const nextText = upsertGlobalBootstrapBlock(existingText, buildGlobalBootstrapBlock(skillRoot));
   await writeText(agentsPath, nextText);
   return agentsPath;
-}
-
-async function isProjectDirectory(projectRoot) {
-  try {
-    const entries = await fs.readdir(projectRoot);
-    return PROJECT_MARKERS.some((marker) => entries.includes(marker));
-  } catch {
-    return false;
-  }
 }
 
 async function initializeProjectIfNeeded(projectRoot) {
